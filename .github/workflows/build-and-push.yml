@@ -42,7 +42,22 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      # Step 6: Build and push the Docker image
+      # Step 6: Cache Docker layers with automatic cleanup
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-docker-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-docker-buildx-
+
+      # Step 7: Cleanup unused cache (optional but recommended)
+      - name: Cleanup unused cache
+        if: success()
+        run: |
+          docker builder prune --filter until=24h --filter type=cache -f
+
+      # Step 8: Build and push the Docker image
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v6
         with:
@@ -51,3 +66,5 @@ jobs:
           push: true
           tags: ${{ inputs.ecr_registry }}/${{ inputs.image_name }}:latest
           platforms: linux/amd64,linux/arm64
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
