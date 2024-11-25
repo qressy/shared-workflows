@@ -7,10 +7,6 @@ on:
         description: "Name of the Docker image"
         required: true
         type: string
-      ecr_registry:
-        description: "ECR Registry URL"
-        required: true
-        type: string
 
 jobs:
   build-and-push:
@@ -64,7 +60,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ inputs.ecr_registry }}/${{ inputs.image_name }}:latest
+          tags: 953467367422.dkr.ecr.ap-south-1.amazonaws.com/${{ inputs.image_name }}:latest
           platforms: linux/amd64,linux/arm64
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
